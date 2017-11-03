@@ -17,7 +17,7 @@
  * D5 - 
  * D6 - 
  * D7 - 
- * D8 - 
+ * D8 - sterowanie zewnętrznym przekaźnikiem, załączenie poprzez stan niski
  * D9 - 
  * D10 - 
  * D11 - 
@@ -25,7 +25,8 @@
  * D13 - 
  */
 
-const int PinCzujnikaNTC = 1;
+const int PinCzujnikaNTC = 1; // pin analogowy A1
+const int PinPrzekaznika = 8; // pin cyfrowy B8
 
 float temperaturaNTC(int pinNTC)
 /*
