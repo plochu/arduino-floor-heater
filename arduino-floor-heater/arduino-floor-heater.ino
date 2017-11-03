@@ -67,7 +67,25 @@ void PrzekaznikInicjalizuj()
   pinMode(LEDPrzekaznika, OUTPUT);
 
   digitalWrite(PinPrzekaznika, HIGH); // przekaźnik wyłączony
-  digitalWrite(LEDPrzekaznika, LOW);  // LED wyłączony
+  digitalWrite(LEDPrzekaznika, LOW);  // LED sygnalizujący wyłączony
+}
+
+void PrzekaznikZalacz()
+/*
+ * funkcja załączająca zewnętrzny przekaźnik oraz włączająca diodę LED sygnalizującą jego stan
+ */
+{
+  digitalWrite(PinPrzekaznika, LOW);  // przekaźnik załączony
+  digitalWrite(LEDPrzekaznika, HIGH); // LED sygnalizujący włączony
+}
+
+void PrzekaznikWylacz()
+/*
+ * funkcja wyłączająca zewnętrzny przekaźnik oraz wyłączająca diodę LED sygnalizującą jego stan
+ */
+{
+  digitalWrite(PinPrzekaznika, HIGH); // przekaźnik wyłączony
+  digitalWrite(LEDPrzekaznika, LOW);  // LED sygnalizujący wyłączony
 }
 
 void setup() {
