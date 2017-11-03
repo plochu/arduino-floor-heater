@@ -7,8 +7,8 @@
  * A1 - pomiar rezystancji czujnika NTC temperatury podłogi
  * A2 - 
  * A3 - 
- * A4 - 
- * A5 - 
+ * A4 - wyświetlacz OLED I2C
+ * A5 - wyświetlacz OLED I2C
  * D0 - 
  * D1 - 
  * D2 - 
@@ -24,6 +24,10 @@
  * D12 - 
  * D13 - 
  */
+
+#include "U8glib.h" // zaawansowana biblioteka do obsługi wyświetlaczy, Universal 8bit Graphics Library, https://github.com/olikraus/u8glib/
+
+U8GLIB_SSD1306_128X64 u8g(U8G_I2C_OPT_NONE|U8G_I2C_OPT_DEV_0);  // inicjalizacja sterownika wyświetlacza OLED 128x64px, 0,96 cala, monochromatyczny, ze sterownikiem SSD1306, działający na magistrali I2C/TWI
 
 const int PinCzujnikaNTC = 1;
 
