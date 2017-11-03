@@ -54,7 +54,9 @@ float temperaturaNTC(int pinNTC)
 }
 
 void setup() {
+  Serial.begin(9600);
 }
 
 void loop() {
+  Serial.println(temperaturaNTC(1));
 }
