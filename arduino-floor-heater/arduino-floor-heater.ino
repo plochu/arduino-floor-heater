@@ -25,6 +25,8 @@
  * D13 - 
  */
 
+const int PinCzujnikaNTC = 1;
+
 float temperaturaNTC(int pinNTC)
 /*
  * funkcja zwraca wartość temperatury w stopniach celcjusza wyliczonej na podstawie pomiaru rezystancji czujnika NTC
@@ -58,5 +60,5 @@ void setup() {
 }
 
 void loop() {
-  Serial.println(temperaturaNTC(1));
+  Serial.println(temperaturaNTC(PinCzujnikaNTC));
 }
