@@ -227,7 +227,7 @@ void Przerwanie()
 void setup() {
   
 // inicjalizacja na potrzeby diagnostyczne
-  Serial.begin(9600);
+//  Serial.begin(9600);
   
 // wyłączenie wbudowanej diody LED (domyślnie włączona)  
   pinMode(LED_BUILTIN, OUTPUT);
@@ -241,6 +241,6 @@ void setup() {
 }
 
 void loop() {
-  Serial.println(temperaturaNTC(PinCzujnikaNTC));
+//  Serial.println(temperaturaNTC(PinCzujnikaNTC));
   EkranWyswietl(TrybSterownika);
 }
