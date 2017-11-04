@@ -12,12 +12,12 @@
  * D0 - 
  * D1 - 
  * D2 - 
- * D3 - 
+ * D3 - LED sygnalizujący załączenie przekaźnika
  * D4 - 
  * D5 - 
  * D6 - 
  * D7 - 
- * D8 - 
+ * D8 - sterowanie zewnętrznym przekaźnikiem, załączenie poprzez stan niski
  * D9 - 
  * D10 - 
  * D11 - 
@@ -25,7 +25,9 @@
  * D13 - 
  */
 
-const int PinCzujnikaNTC = 1;
+const int PinCzujnikaNTC = 1; // pin analogowy A1
+const int LEDPrzekaznika = 3; // pin cyfrowy D3
+const int PinPrzekaznika = 8; // pin cyfrowy D8
 
 float temperaturaNTC(int pinNTC)
 /*
@@ -55,8 +57,56 @@ float temperaturaNTC(int pinNTC)
   return ( ( ( ( 1 / ( ( log(RezystancjaNTC / 15500) / 3625) + (1 / 298.15 ) ) ) - 273.15) ) );
 }
 
+void PrzekaznikInicjalizuj()
+/*
+ * funkcja inicjalizuje obsługę zewnętrznego przekaźnika oraz diody sygnalizującej jego pracę poprzez zdefiniowanie parametrów wyjść cyfrowych oraz ustawienie odpowiednich stanów na tych wyjściach
+ * przekaźnik jest załączany stanem niskim
+ */
+{
+  pinMode(PinPrzekaznika, OUTPUT);
+  pinMode(LEDPrzekaznika, OUTPUT);
+
+  digitalWrite(PinPrzekaznika, HIGH); // przekaźnik wyłączony
+  digitalWrite(LEDPrzekaznika, LOW);  // LED sygnalizujący wyłączony
+}
+
+void PrzekaznikZalacz()
+/*
+ * funkcja załączająca zewnętrzny przekaźnik oraz włączająca diodę LED sygnalizującą jego stan
+ */
+{
+  digitalWrite(PinPrzekaznika, LOW);  // przekaźnik załączony
+  digitalWrite(LEDPrzekaznika, HIGH); // LED sygnalizujący włączony
+}
+
+void PrzekaznikWylacz()
+/*
+ * funkcja wyłączająca zewnętrzny przekaźnik oraz wyłączająca diodę LED sygnalizującą jego stan
+ */
+{
+  digitalWrite(PinPrzekaznika, HIGH); // przekaźnik wyłączony
+  digitalWrite(LEDPrzekaznika, LOW);  // LED sygnalizujący wyłączony
+}
+
+void PrzekaznikStan()
+/*
+ * funkcja sprawdza stan przekaźnika
+ * - w przypadku gdy jest załączony funkcja zwraca wartość TRUE
+ * - w innym wypadku funkcja zwraca wartość FALSE
+ */
+{
+  if (digitalRead(PinPrzekaznika)) {
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
+
 void setup() {
   Serial.begin(9600); // inicjalizacja na potrzeby diagnostyczne
+  PrzekaznikInicjalizuj();
 }
 
 void loop() {
