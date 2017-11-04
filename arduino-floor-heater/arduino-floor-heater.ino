@@ -85,6 +85,14 @@ void LEDyInicjalizuj()
 }
 
 
+float temperaturaZadana(int pinPomiaru)
+/*
+ * funkcja zwraca wartość zadanej temperatury określonej na podstawie ustawienia potencjometru podłączonego do pinu A0 i mapowanej na zakres 16 - 32
+ */
+{
+  return(map(analogRead(pinPomiaru), 0, 1023, 16, 32));
+}
+
 float temperaturaNTC(int pinNTC)
 /*
  * funkcja zwraca wartość temperatury w stopniach celcjusza wyliczonej na podstawie pomiaru rezystancji czujnika NTC
@@ -142,7 +150,13 @@ void EkranWyswietl(int Tryb)
       }
       case 2: {
         EkranPanelTemperaturaNTC(temperaturaNTC(PinCzujnikaNTC));
-        EkranPanelGrzenie();
+        EkranPanelGrzanie();
+        break;
+      }
+      case 3: {
+        EkranPanelTemperaturaNTC(temperaturaNTC(PinCzujnikaNTC));
+        EkranPanelAutomat(temperaturaZadana(PinPotencjometru));
+        break;
       }
     }
   } while( u8g.nextPage() );  
@@ -190,7 +204,7 @@ void EkranPanelPrzegrzanie()
   u8g.drawDisc(112,55,8);  
 }
 
-void EkranPanelGrzenie()
+void EkranPanelGrzanie()
 /*
  * panel z ikoną symbolizującą manualne grzanie do maksymalnej temperatury
  */
