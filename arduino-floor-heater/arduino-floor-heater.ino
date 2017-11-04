@@ -49,12 +49,18 @@ bool Bezpiecznik = true;
 const int LimitTemperatury = 35;  // temperatura pracy
 const int LimitBezpieczenstwa = 5;  // różnica pomiędzy maksymalną temperaturą a progiem wyłączenia wcześniej załączonego bezpiecznika
 
+const float DeltaTemperatury = 1.25;  // różnica w stosunku do temperatury zadanej powodująca załączenie i wyłączenie obwodu grzewczego
+const long OdstepZmiany = 60; // minimalny czas w sekundach cyklu załączenia / rozłączenia przekaźnika w trybie grzania automatycznego
+
+unsigned long OstatniaZmiana = 0; // zmienna przechowująca informację o czasie ostatniego przełączenia przekaźnika w trybie grzania automatycznego
+
 int TrybSterownika = 0; // domyślny tryb pracy sterownika po uruchomieniu
 /*
  * zmienna odpowiedzialna za ustalenie trybu pracy sterownika
  * 0 - tryb polegający wyłącznie na wyświetlaniu aktualnej temperatury czujnika NTC
  * 1 - zabezpieczenie przeciw przegrzaniu
  * 2 - tryb grzania do maksymalnej temperatury
+ * 3 - tryb grzania automatycznego
  */
 
 int TrybSterownikaPoprzedni = 0; // zmienna przechowująca poprzedni tryb pracy sterownika
@@ -394,15 +400,45 @@ void ProgramSterownika(int Tryb)
         PrzekaznikZalacz();
       }
       break;
+    case 3: {
+      ProgramSterownikaAutomatyczny();
+      break;
+    }
+    }
+  }
+}
+
+void ProgramSterownikaAutomatyczny()
+/*
+ * program ogrzewania automatycznego, obwód grzewczy załącza się w momencie kiedy temperatura spadnie o określoną wartość (DeltaTemperatury) w stosunku 
+ * do zadanej temperatury potencjometrem. przekaźnik obwodu jest wyłączany gdy temperatura przekroczy o DeltaTemperatury zadaną wartość. program
+ * ogranicza liczbę załączeń / wyłączeń przekaźnika tak aby odstęp pomiędzy nimi wynosił co najmniej OdstępZmiany.
+ */
+{
+  if ( (millis() - OstatniaZmiana) > (OdstepZmiany * 1000) || (OstatniaZmiana == 0) ) {
+    float Cel;
+    float Temp;
+    
+    Cel = temperaturaZadana(PinPotencjometru);
+    Temp = temperaturaNTC(PinCzujnikaNTC);
+    
+    if (Temp > (Cel + DeltaTemperatury)) {
+      if (PrzekaznikStan()) {
+        PrzekaznikWylacz();
+        OstatniaZmiana = millis();
+      }
+    }
+    
+    if (Temp < (Cel - DeltaTemperatury)) {
+      if (!PrzekaznikStan()) {
+        PrzekaznikZalacz();
+        OstatniaZmiana = millis();
+      }
     }
   }
 }
 
 void setup() {
-  
-// inicjalizacja na potrzeby diagnostyczne
-//  Serial.begin(9600);
-  
 // wyłączenie wbudowanej diody LED (domyślnie włączona)  
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
@@ -415,7 +451,6 @@ void setup() {
 }
 
 void loop() {
-//  Serial.println(temperaturaNTC(PinCzujnikaNTC));
   Zabezpieczenie(temperaturaNTC(PinCzujnikaNTC), LimitTemperatury, LimitBezpieczenstwa);
   KontrolaPrzyciskow();
   TrybSterownikaLEDy(TrybSterownika);
