@@ -93,9 +93,9 @@ void PrzekaznikInicjalizuj()
  */
 {
   pinMode(PinPrzekaznika, OUTPUT);
-  pinMode(LEDPrzekaznika, OUTPUT);
-
   digitalWrite(PinPrzekaznika, HIGH); // przekaźnik wyłączony
+    
+  pinMode(LEDPrzekaznika, OUTPUT);
   digitalWrite(LEDPrzekaznika, LOW);  // LED sygnalizujący wyłączony
 }
 
