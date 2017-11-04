@@ -11,7 +11,7 @@
  * A5 - wyświetlacz OLED I2C
  * D0 - 
  * D1 - 
- * D2 - przycisk 1
+ * D2 - przycisk 1 z obsługą przerwania zewnętrznego
  * D3 - LED sygnalizujący załączenie przekaźnika (LED przycisku 1)
  * D4 - LED przycisku 2
  * D5 - przycisk 2
@@ -39,6 +39,12 @@ const int PinPrzycisku3 = 6;  // pin cyfrowy D6
 const int LEDPrzycisku3 = 7;  // pin cyfrowy D7
 const int PinPrzekaznika = 8; // pin cyfrowy D8
 
+int TrybSterownika = 0; // domyślny tryb pracy sterownika po uruchomieniu
+/*
+ * zmienna odpowiedzialna za ustalenie trybu pracy sterownika
+ * 0 - tryb polegający wyłącznie na wyświetlaniu aktualnej temperatury czujnika NTC
+ */
+
 void PrzyciskiInicjalizuj()
 /*
  * funkcja inicjalizuje obsługiwane przyciski wykorzystując rezystowy podciągające wbudowane w układ Arduino
@@ -49,6 +55,8 @@ void PrzyciskiInicjalizuj()
   pinMode(PinPrzycisku1, INPUT_PULLUP);
   pinMode(PinPrzycisku2, INPUT_PULLUP);
   pinMode(PinPrzycisku3, INPUT_PULLUP);
+
+  attachInterrupt(digitalPinToInterrupt(PinPrzycisku1), Przerwanie, LOW);
 }
 
 void LEDyInicjalizuj()
@@ -205,6 +213,17 @@ void PrzekaznikPrzelacz()
   digitalWrite(LEDPrzekaznika, !digitalRead(LEDPrzekaznika));
 }
 
+void Przerwanie()
+/*
+ * funkcja wyłączająca bezwarunkowo przekaźnik zewnętrzny, ustawiająca sterownik w trybie 0 oraz resetująca pętlę główną poprzez przeładowanie kodu
+ */
+{
+  PrzekaznikWylacz();
+  while (digitalRead(PinPrzycisku1) == LOW) { } // zapobiega ciągłemu restartowaniu jeżeli przycisk jest przytrzymany
+  TrybSterownika = 0;
+  asm volatile("  jmp 0");  // restert pętli głównej poprzez przeładowanie kodu, ale bez restartu całego mikrokontrolera
+}
+
 void setup() {
   
 // inicjalizacja na potrzeby diagnostyczne
@@ -223,5 +242,5 @@ void setup() {
 
 void loop() {
   Serial.println(temperaturaNTC(PinCzujnikaNTC));
-  EkranWyswietl(0);
+  EkranWyswietl(TrybSterownika);
 }
