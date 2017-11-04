@@ -3,7 +3,7 @@
  * https://github.com/plochu/arduino-floor-heater
  *
  * inwentaryzacja wejść / wyjść Arduino UNO R3
- * A0 - 
+ * A0 - potencjometr nastawczy
  * A1 - pomiar rezystancji czujnika NTC temperatury podłogi
  * A2 - 
  * A3 - 
@@ -11,12 +11,12 @@
  * A5 - 
  * D0 - 
  * D1 - 
- * D2 - 
- * D3 - LED sygnalizujący załączenie przekaźnika
- * D4 - 
- * D5 - 
- * D6 - 
- * D7 - 
+ * D2 - przycisk 1
+ * D3 - LED sygnalizujący załączenie przekaźnika (LED przycisku 1)
+ * D4 - LED przycisku 2
+ * D5 - przycisk 2
+ * D6 - przycisk 3
+ * D7 - LED przycisku 3
  * D8 - sterowanie zewnętrznym przekaźnikiem, załączenie poprzez stan niski
  * D9 - 
  * D10 - 
@@ -25,9 +25,38 @@
  * D13 - 
  */
 
+const int PinPotencjometru = 0; // pin analogowy A0
 const int PinCzujnikaNTC = 1; // pin analogowy A1
+const int PinPrzycisku1 = 2;  // pin cyfrowy D2
 const int LEDPrzekaznika = 3; // pin cyfrowy D3
+const int LEDPrzycisku2 = 4;  // pin cyfrowy D4
+const int PinPrzycisku2 = 5;  // pin cyfrowy D5
+const int PinPrzycisku3 = 6;  // pin cyfrowy D6
+const int LEDPrzycisku3 = 7;  // pin cyfrowy D7
 const int PinPrzekaznika = 8; // pin cyfrowy D8
+
+void PrzyciskiInicjalizuj()
+/*
+ * funkcja inicjalizuje obsługiwane przyciski wykorzystując rezystowy podciągające wbudowane w układ Arduino
+ * rozpoznawanie naciśnięcia przycisku realizowane jest przez podanie stanu niskiego na odpowiadające mu wejście cyfrowe
+ */
+
+{
+  pinMode(PinPrzycisku1, INPUT_PULLUP);
+  pinMode(PinPrzycisku2, INPUT_PULLUP);
+  pinMode(PinPrzycisku3, INPUT_PULLUP);
+}
+
+void LEDyInicjalizuj()
+/*
+ * funkcja inicjalizuje odpowiednie piny jako wyjścia do sterowania diodami LED oraz ustawia ich stan na niski
+ */
+{
+  pinMode(LEDPrzycisku2, OUTPUT);
+  digitalWrite(LEDPrzycisku2, LOW);
+  pinMode(LEDPrzycisku3, OUTPUT);
+  digitalWrite(LEDPrzycisku3, LOW);
+}
 
 float temperaturaNTC(int pinNTC)
 /*
@@ -122,6 +151,8 @@ void setup() {
   digitalWrite(LED_BUILTIN, LOW);
 
 // inicjalizacja sterownika 
+  LEDyInicjalizuj();
+  PrzyciskiInicjalizuj();
   PrzekaznikInicjalizuj();
 }
 
