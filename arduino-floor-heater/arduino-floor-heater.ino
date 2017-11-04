@@ -189,14 +189,14 @@ void PrzekaznikWylacz()
   digitalWrite(LEDPrzekaznika, LOW);  // LED sygnalizujący wyłączony
 }
 
-void PrzekaznikStan()
+bool PrzekaznikStan()
 /*
  * funkcja sprawdza stan przekaźnika
  * - w przypadku gdy jest załączony funkcja zwraca wartość TRUE
  * - w innym wypadku funkcja zwraca wartość FALSE
  */
 {
-  if (digitalRead(PinPrzekaznika)) {
+  if (!digitalRead(PinPrzekaznika)) {
     return true;
   }
   else {
@@ -215,13 +215,15 @@ void PrzekaznikPrzelacz()
 
 void Przerwanie()
 /*
- * funkcja wyłączająca bezwarunkowo przekaźnik zewnętrzny, ustawiająca sterownik w trybie 0 oraz resetująca pętlę główną poprzez przeładowanie kodu
+ * funkcja wyłączająca bezwarunkowo przekaźnik zewnętrzny oraz resetująca pętlę główną poprzez przeładowanie kodu
+ * funkcja wykona się jedynie w przypadku gdy przekaźnik był załączony
  */
 {
-  PrzekaznikWylacz();
-  while (digitalRead(PinPrzycisku1) == LOW) { } // zapobiega ciągłemu restartowaniu jeżeli przycisk jest przytrzymany
-  TrybSterownika = 0;
-  asm volatile("  jmp 0");  // restert pętli głównej poprzez przeładowanie kodu, ale bez restartu całego mikrokontrolera
+  if (PrzekaznikStan()) {
+    PrzekaznikWylacz();
+    while (digitalRead(PinPrzycisku1) == LOW) { } // zapobiega ciągłemu restartowaniu jeżeli przycisk jest przytrzymany
+    asm volatile("  jmp 0");  // restart pętli głównej poprzez przeładowanie kodu sterownika, ale bez restartu całego mikrokontrolera
+  }
 }
 
 void setup() {
