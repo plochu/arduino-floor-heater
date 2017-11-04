@@ -113,10 +113,19 @@ void PrzekaznikPrzelacz()
 }
 
 void setup() {
-  Serial.begin(9600); // inicjalizacja na potrzeby diagnostyczne
+  
+// inicjalizacja na potrzeby diagnostyczne
+  Serial.begin(9600);
+  
+// wyłączenie wbudowanej diody LED (domyślnie włączona)  
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, LOW);
+
+// inicjalizacja sterownika 
   PrzekaznikInicjalizuj();
 }
 
 void loop() {
   Serial.println(temperaturaNTC(PinCzujnikaNTC));
+  delay(1000);  // opóźnienie pętli głównej na potrzeby diagnostyczne
 }
