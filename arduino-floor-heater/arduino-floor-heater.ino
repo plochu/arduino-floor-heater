@@ -158,6 +158,15 @@ void EkranPanelTemperaturaNTC(float Temp)
     u8g.drawCircle(83, 14, 4);
 }
 
+void EkranPanelPrzegrzanie()
+/*
+ * panel z ikoną symbolizującą zabezpieczenie przed przegrzaniem
+ */
+{
+  u8g.drawTriangle(97,3, 112,40, 127,3);
+  u8g.drawDisc(112,55,8);  
+}
+
 void PrzekaznikInicjalizuj()
 /*
  * funkcja inicjalizuje obsługę zewnętrznego przekaźnika oraz diody sygnalizującej jego pracę poprzez zdefiniowanie parametrów wyjść cyfrowych oraz ustawienie odpowiednich stanów na tych wyjściach
