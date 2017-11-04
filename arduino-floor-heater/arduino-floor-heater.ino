@@ -43,6 +43,7 @@ int TrybSterownika = 0; // domyślny tryb pracy sterownika po uruchomieniu
 /*
  * zmienna odpowiedzialna za ustalenie trybu pracy sterownika
  * 0 - tryb polegający wyłącznie na wyświetlaniu aktualnej temperatury czujnika NTC
+ * 1 - zabezpieczenie przeciw przegrzaniu
  */
 
 void PrzyciskiInicjalizuj()
@@ -119,6 +120,11 @@ void EkranWyswietl(int Tryb)
     switch (Tryb) {
       default: {
         EkranPanelTemperaturaNTC(temperaturaNTC(PinCzujnikaNTC));
+        break;
+      }
+      case 1: {
+        EkranPanelTemperaturaNTC(temperaturaNTC(PinCzujnikaNTC));
+        EkranPanelPrzegrzanie();
         break;
       }
     }
