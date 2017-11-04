@@ -140,6 +140,10 @@ void EkranWyswietl(int Tryb)
         EkranPanelPrzegrzanie();
         break;
       }
+      case 2: {
+        EkranPanelTemperaturaNTC(temperaturaNTC(PinCzujnikaNTC));
+        EkranPanelGrzenie();
+      }
     }
   } while( u8g.nextPage() );  
 }
@@ -184,6 +188,36 @@ void EkranPanelPrzegrzanie()
 {
   u8g.drawTriangle(97,3, 112,40, 127,3);
   u8g.drawDisc(112,55,8);  
+}
+
+void EkranPanelGrzenie()
+/*
+ * panel z ikoną symbolizującą manualne grzanie do maksymalnej temperatury
+ */
+{
+        u8g.drawTriangle(112,3, 97,18, 127,18);
+        u8g.drawTriangle(112,18, 97,33, 127,33);
+        u8g.drawTriangle(112,33, 97,48, 127,48);
+        u8g.drawTriangle(112,48, 97,63, 127,63);  
+}
+
+void EkranPanelAutomat(float Temp)
+/*
+ * panel z ikoną symbolizującą manualne grzanie do maksymalnej temperatury
+ */
+{
+  u8g.drawFrame(86,40,42,24); // narysowanie ramki
+  
+  if (Temp < 9.50) {
+    u8g.setPrintPos(103,62);  // liczby jednocyfrowej
+  }
+  else {
+    u8g.setPrintPos(87,62); // liczby dwucyfrowej
+  }
+  
+  u8g.setFont(u8g_font_fur20n); // ustawienie małej czcionki
+  u8g.print(Temp, 0); // wyświetlenie wartości zadanej temperatury zaokrąglonej do najbliższej liczby całkowitej
+  u8g.drawCircle(122, 45, 3); // narysowanie symbolu stopni
 }
 
 void PrzekaznikInicjalizuj()
@@ -329,7 +363,28 @@ void TrybSterownikaLEDy(int Tryb)
   }
 }
 
- void setup() {
+void ProgramSterownika(int Tryb)
+/*
+ * funkcja zawiera i realizuje programy sterowania ogrzewaniem
+ */
+{
+  switch (Tryb) {
+    default: {
+      if (PrzekaznikStan()) {
+        PrzekaznikWylacz();
+      }
+      break;
+    }
+    case 2: {
+      if (!PrzekaznikStan()) {
+        PrzekaznikZalacz();
+      }
+      break;
+    }
+  }
+}
+
+void setup() {
   
 // inicjalizacja na potrzeby diagnostyczne
 //  Serial.begin(9600);
@@ -350,5 +405,6 @@ void loop() {
   Zabezpieczenie(temperaturaNTC(PinCzujnikaNTC), LimitTemperatury, LimitBezpieczenstwa);
   KontrolaPrzyciskow();
   TrybSterownikaLEDy(TrybSterownika);
+  ProgramSterownika(TrybSterownika);
   EkranWyswietl(TrybSterownika);
 }
