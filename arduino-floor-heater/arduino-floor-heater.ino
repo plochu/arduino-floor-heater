@@ -67,6 +67,57 @@ void OLEDInicjalizuj()
   u8g.setRot180();  // obrót obrazu ze względu na specyfikę montażu wyświetlacza
 }
 
+void EkranWyswietl(int Tryb)
+/*
+ * funkcja wykonuje pętlę obrazu konieczną do prawidłowego wyświetlenia zawartości ekranu
+ * w zależności od podanego przy wywołaniu funkcji argumentu wyświetlany jest różny zestaw paneli informacyjnych
+ * jeżeli zostanie podany nierozpoznany argument to wyświetli się zestaw domyślny
+ */
+{
+  u8g.firstPage();  
+  do {
+    switch (Tryb) {
+      default: {
+        EkranPanelTemperaturaNTC(temperaturaNTC(PinCzujnikaNTC));
+        break;
+      }
+    }
+  } while( u8g.nextPage() );  
+}
+
+void EkranPanelTemperaturaNTC(float Temp)
+/*
+ * panel z temperaturą z czujnika NTC
+ * jako argument funkcji wprowadzana jest aktualna wartość temperatury do wyświetlenia
+ * obsługiwany jest zakres wartości temperatury 0-99, poza tym zakresem wyświetlany jest komunikat "--"
+ */
+{
+// ustawienie dużej czcionki (zawiera tylko cyfry)
+  u8g.setFont(u8g_font_fur49n);
+
+  if ( (Temp >=0 ) && (Temp <= 99) ) {
+    // w zależności od tego czy wyświetlana wartość jest liczbą jedno czy dwucyfrową będzie wyświetlana w różnych miejscach
+    if (Temp < 9.50) {
+      u8g.setPrintPos(38,57); // pozycja liczby jednocyfrowej
+      }
+    else {
+      u8g.setPrintPos(0,57);  // pozycja liczby dwucyfrowej
+    }
+  
+    // wyświetlenie liczby zaokrąglonej do najbliższej liczby całkowitej
+    u8g.print(Temp,0);
+    }
+   else {
+    u8g.setPrintPos(28,57);
+    u8g.print("--");
+   }
+
+// narysowanie symbolu stopni
+    u8g.drawCircle(83, 14, 6);
+    u8g.drawCircle(83, 14, 5);
+    u8g.drawCircle(83, 14, 4);
+}
+
 void setup() {
   Serial.begin(9600); // inicjalizacja na potrzeby diagnostyczne
   OLEDInicjalizuj();
@@ -74,4 +125,5 @@ void setup() {
 
 void loop() {
   Serial.println(temperaturaNTC(PinCzujnikaNTC));
+  EkranWyswietl(0);
 }
