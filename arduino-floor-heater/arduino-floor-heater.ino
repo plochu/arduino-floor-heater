@@ -103,6 +103,14 @@ void PrzekaznikStan()
   }
 }
 
+void PrzekaznikPrzelacz()
+/*
+ * funkcja przełącza zewnętrzny przekaźnik oraz sygnalizacyjną diodę LED na stan przeciwny
+ */
+{
+  digitalWrite(PinPrzekaznika, !digitalRead(PinPrzekaznika));
+  digitalWrite(LEDPrzekaznika, !digitalRead(LEDPrzekaznika));
+}
 
 void setup() {
   Serial.begin(9600); // inicjalizacja na potrzeby diagnostyczne
