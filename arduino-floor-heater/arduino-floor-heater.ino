@@ -88,6 +88,22 @@ void PrzekaznikWylacz()
   digitalWrite(LEDPrzekaznika, LOW);  // LED sygnalizujący wyłączony
 }
 
+void PrzekaznikStan()
+/*
+ * funkcja sprawdza stan przekaźnika
+ * - w przypadku gdy jest załączony funkcja zwraca wartość TRUE
+ * - w innym wypadku funkcja zwraca wartość FALSE
+ */
+{
+  if (digitalRead(PinPrzekaznika)) {
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
+
 void setup() {
   Serial.begin(9600); // inicjalizacja na potrzeby diagnostyczne
   PrzekaznikInicjalizuj();
