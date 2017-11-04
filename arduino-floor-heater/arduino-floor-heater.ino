@@ -59,8 +59,17 @@ float temperaturaNTC(int pinNTC)
   return ( ( ( ( 1 / ( ( log(RezystancjaNTC / 15500) / 3625) + (1 / 298.15 ) ) ) - 273.15) ) );
 }
 
+void OLEDInicjalizuj()
+/*
+ * funkcja inicjalizująca sterownik wyświetlacza wg. zadanych parametrów
+ */
+{
+  u8g.setRot180();  // obrót obrazu ze względu na specyfikę montażu wyświetlacza
+}
+
 void setup() {
   Serial.begin(9600); // inicjalizacja na potrzeby diagnostyczne
+  OLEDInicjalizuj();
 }
 
 void loop() {
