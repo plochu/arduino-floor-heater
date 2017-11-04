@@ -39,11 +39,25 @@ const int PinPrzycisku3 = 6;  // pin cyfrowy D6
 const int LEDPrzycisku3 = 7;  // pin cyfrowy D7
 const int PinPrzekaznika = 8; // pin cyfrowy D8
 
+bool Bezpiecznik = true;
+/*
+ * programowy bezpiecznik sterownika
+ * true - bezpiecznik nieaktywny
+ * false - nastąpiło załączenie bezpiecznika w wyniku np. osiągnięcia maksymalnej dopuszczalnej temperatury ogrzewania
+ */
+
+const int LimitTemperatury = 35;  // temperatura pracy
+const int LimitBezpieczenstwa = 5;  // różnica pomiędzy maksymalną temperaturą a progiem wyłączenia wcześniej załączonego bezpiecznika
+
 int TrybSterownika = 0; // domyślny tryb pracy sterownika po uruchomieniu
 /*
  * zmienna odpowiedzialna za ustalenie trybu pracy sterownika
  * 0 - tryb polegający wyłącznie na wyświetlaniu aktualnej temperatury czujnika NTC
+ * 1 - zabezpieczenie przeciw przegrzaniu
+ * 2 - tryb grzania do maksymalnej temperatury
  */
+
+int TrybSterownikaPoprzedni = 0; // zmienna przechowująca poprzedni tryb pracy sterownika
 
 void PrzyciskiInicjalizuj()
 /*
@@ -121,6 +135,11 @@ void EkranWyswietl(int Tryb)
         EkranPanelTemperaturaNTC(temperaturaNTC(PinCzujnikaNTC));
         break;
       }
+      case 1: {
+        EkranPanelTemperaturaNTC(temperaturaNTC(PinCzujnikaNTC));
+        EkranPanelPrzegrzanie();
+        break;
+      }
     }
   } while( u8g.nextPage() );  
 }
@@ -156,6 +175,15 @@ void EkranPanelTemperaturaNTC(float Temp)
     u8g.drawCircle(83, 14, 6);
     u8g.drawCircle(83, 14, 5);
     u8g.drawCircle(83, 14, 4);
+}
+
+void EkranPanelPrzegrzanie()
+/*
+ * panel z ikoną symbolizującą zabezpieczenie przed przegrzaniem
+ */
+{
+  u8g.drawTriangle(97,3, 112,40, 127,3);
+  u8g.drawDisc(112,55,8);  
 }
 
 void PrzekaznikInicjalizuj()
@@ -226,6 +254,38 @@ void Przerwanie()
   }
 }
 
+void Zabezpieczenie(float TemperaturaBadana, int TemperaturaGraniczna, int MarginesBezpieczenstwa)
+/*
+ * funkcja zabezpieczająca, aktywująca programowy bezpiecznik w przypadku osiągnięcia lub przekroczenia maksymalnej temperatury ogrzewania
+ * bezpiecznik zostaje zwolniony z momencie kiedy temperatura spadnie poniżej temperatury granicznej - margines bezpieczeństwa
+ * funkcja zapamiętuje tryb pracy sterownika przed zadziałaniem bezpiecznika i przywraca go po jego odblokowaniu z wyjątkiem trybu grzania do
+ * maksymalnej temperatury (TrybSterownika = 2) gdzienastąpi przejście do trybu prezentacji temperatury (TrybSterownika = 0)
+ */
+{
+  if (TemperaturaBadana > TemperaturaGraniczna)
+  {
+    PrzekaznikWylacz();
+    Bezpiecznik = false;
+    if (TrybSterownika != 1) {
+      TrybSterownikaPoprzedni = TrybSterownika;
+      TrybSterownika = 1;
+    }
+  }
+  else
+  {
+    if (Bezpiecznik == false && TemperaturaGraniczna - TemperaturaBadana > MarginesBezpieczenstwa)
+    {
+      Bezpiecznik = true;
+      if (TrybSterownikaPoprzedni != 2) {
+        TrybSterownika = TrybSterownikaPoprzedni;
+      }
+      else {
+        TrybSterownika = 0;
+      }
+    }
+  }
+}
+
 void setup() {
   
 // inicjalizacja na potrzeby diagnostyczne
@@ -244,5 +304,6 @@ void setup() {
 
 void loop() {
 //  Serial.println(temperaturaNTC(PinCzujnikaNTC));
+  Zabezpieczenie(temperaturaNTC(PinCzujnikaNTC), LimitTemperatury, LimitBezpieczenstwa);
   EkranWyswietl(TrybSterownika);
 }
