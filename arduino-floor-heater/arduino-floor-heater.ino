@@ -244,13 +244,16 @@ void PrzekaznikPrzelacz()
 void Przerwanie()
 /*
  * funkcja wyłączająca bezwarunkowo przekaźnik zewnętrzny oraz resetująca pętlę główną poprzez przeładowanie kodu
- * funkcja wykona się jedynie w przypadku gdy przekaźnik był załączony
+ * pełna funkcja wykona się jedynie w przypadku gdy przekaźnik był załączony w innym wypadku zostanie tylko przestawiony tryb sterownika na "0"
  */
 {
   if (PrzekaznikStan()) {
     PrzekaznikWylacz();
     while (digitalRead(PinPrzycisku1) == LOW) { } // zapobiega ciągłemu restartowaniu jeżeli przycisk jest przytrzymany
     asm volatile("  jmp 0");  // restart pętli głównej poprzez przeładowanie kodu sterownika, ale bez restartu całego mikrokontrolera
+  }
+  else {
+    TrybSterownika = 0;
   }
 }
 
@@ -286,7 +289,47 @@ void Zabezpieczenie(float TemperaturaBadana, int TemperaturaGraniczna, int Margi
   }
 }
 
-void setup() {
+void KontrolaPrzyciskow()
+/*
+ * funkcja sprawdza czy został nasiśnięty któryś z przycisków sterownika i ustawia odpowiedni tryb pracy
+ * funkcja nie sprawdza przycisku 1 powiązanego z przerwaniem mikrokontrolera
+ */
+{
+  if (digitalRead(PinPrzycisku2) == LOW && Bezpiecznik)
+  {
+    TrybSterownika = 2;
+  }
+  if (digitalRead(PinPrzycisku3) == LOW && Bezpiecznik)
+  {
+    TrybSterownika = 3;
+  }
+}
+
+void TrybSterownikaLEDy(int Tryb)
+/*
+ * funkcja jako argument przyjmuje tryb pracy sterownika i zapala odpowiadające mu diody LED
+ */
+{
+  switch (Tryb) {
+    case 2: {
+      digitalWrite(LEDPrzycisku2, HIGH);
+      digitalWrite(LEDPrzycisku3, LOW);
+      break;
+    }
+    case 3: {
+      digitalWrite(LEDPrzycisku3, HIGH);
+      digitalWrite(LEDPrzycisku2, LOW);
+      break;
+    }
+    default: {
+      digitalWrite(LEDPrzycisku2, LOW);
+      digitalWrite(LEDPrzycisku3, LOW);
+      break;
+    }
+  }
+}
+
+ void setup() {
   
 // inicjalizacja na potrzeby diagnostyczne
 //  Serial.begin(9600);
@@ -305,5 +348,7 @@ void setup() {
 void loop() {
 //  Serial.println(temperaturaNTC(PinCzujnikaNTC));
   Zabezpieczenie(temperaturaNTC(PinCzujnikaNTC), LimitTemperatury, LimitBezpieczenstwa);
+  KontrolaPrzyciskow();
+  TrybSterownikaLEDy(TrybSterownika);
   EkranWyswietl(TrybSterownika);
 }
