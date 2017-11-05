@@ -126,7 +126,7 @@ float temperaturaNTC(int pinNTC)
     RezystancjaNTC = RezystancjaWzorca * pomocnicza;
   }
 
-  return ( ( ( ( 1 / ( ( log(RezystancjaNTC / 15500) / 3625) + (1 / 298.15 ) ) ) - 273.15) ) );
+  return ( ( ( ( 1 / ( ( log(RezystancjaNTC / 15000) / 3625) + (1 / 298.15 ) ) ) - 273.15) ) );
 }
 
 void OLEDInicjalizuj()
