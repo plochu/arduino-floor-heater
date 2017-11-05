@@ -54,6 +54,8 @@ const long OdstepZmiany = 60; // minimalny czas w sekundach cyklu załączenia /
 
 unsigned long OstatniaZmiana = 0; // zmienna przechowująca informację o czasie ostatniego przełączenia przekaźnika w trybie grzania automatycznego
 
+unsigned long OstatniEkran = 0; // zmienna przechowująca informację o czasie ostatniego wyświetlenia danych na ekranie
+
 int TrybSterownika = 0; // domyślny tryb pracy sterownika po uruchomieniu
 /*
  * zmienna odpowiedzialna za ustalenie trybu pracy sterownika
@@ -135,37 +137,40 @@ void OLEDInicjalizuj()
   u8g.setRot180();  // obrót obrazu ze względu na specyfikę montażu wyświetlacza
 }
 
-void EkranWyswietl(int Tryb)
+void EkranWyswietl(int Tryb, float NTC, float Zadana)
 /*
  * funkcja wykonuje pętlę obrazu konieczną do prawidłowego wyświetlenia zawartości ekranu
  * w zależności od podanego przy wywołaniu funkcji argumentu wyświetlany jest różny zestaw paneli informacyjnych
  * jeżeli zostanie podany nierozpoznany argument to wyświetli się zestaw domyślny
+ * ekran odświeża się maksymalnie raz na sekundę
  */
 {
-  u8g.firstPage();  
-  do {
-    switch (Tryb) {
-      default: {
-        EkranPanelTemperaturaNTC(temperaturaNTC(PinCzujnikaNTC));
-        break;
+  if ( (millis() - OstatniEkran) > ( 1000 ) || (OstatniEkran == 0) ) {
+    u8g.firstPage();  
+    do {
+      switch (Tryb) {
+        default: {
+          EkranPanelTemperaturaNTC(NTC);
+          break;
+        }
+        case 1: {
+          EkranPanelTemperaturaNTC(NTC);
+          EkranPanelPrzegrzanie();
+          break;
+        }
+        case 2: {
+          EkranPanelTemperaturaNTC(NTC);
+          EkranPanelGrzanie();
+          break;
+        }
+        case 3: {
+          EkranPanelTemperaturaNTC(NTC);
+          EkranPanelAutomat(Zadana);
+          break;
+        }
       }
-      case 1: {
-        EkranPanelTemperaturaNTC(temperaturaNTC(PinCzujnikaNTC));
-        EkranPanelPrzegrzanie();
-        break;
-      }
-      case 2: {
-        EkranPanelTemperaturaNTC(temperaturaNTC(PinCzujnikaNTC));
-        EkranPanelGrzanie();
-        break;
-      }
-      case 3: {
-        EkranPanelTemperaturaNTC(temperaturaNTC(PinCzujnikaNTC));
-        EkranPanelAutomat(temperaturaZadana(PinPotencjometru));
-        break;
-      }
-    }
-  } while( u8g.nextPage() );  
+    } while( u8g.nextPage() );  
+  }
 }
 
 void EkranPanelTemperaturaNTC(float Temp)
@@ -455,5 +460,5 @@ void loop() {
   KontrolaPrzyciskow();
   TrybSterownikaLEDy(TrybSterownika);
   ProgramSterownika(TrybSterownika);
-  EkranWyswietl(TrybSterownika);
+  EkranWyswietl(TrybSterownika, temperaturaNTC(PinCzujnikaNTC), temperaturaZadana(PinPotencjometru));
 }
